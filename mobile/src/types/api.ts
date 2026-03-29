@@ -37,6 +37,18 @@ export interface Location {
   calendarId: string | null;
 }
 
+export interface CallLog {
+  id: string;
+  direction: string;
+  status: string;
+  startedAt: string;
+  endedAt: string | null;
+  summary: string | null;
+  transcript: string | null;
+  recordingUrl: string | null;
+  createdAt: string;
+}
+
 export interface PagedResult<T> {
   items: T[];
   page: number;

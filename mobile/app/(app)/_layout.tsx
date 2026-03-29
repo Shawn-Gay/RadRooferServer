@@ -35,6 +35,15 @@ export default function AppLayout() {
         }}
       />
       <Tabs.Screen
+        name="calls"
+        options={{
+          title: 'Calls',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="call-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="locations"
         options={{
           title: 'Locations',

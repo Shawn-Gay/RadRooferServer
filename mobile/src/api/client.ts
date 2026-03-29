@@ -3,6 +3,7 @@ import type {
   LoginResponse,
   AppointmentStats,
   Appointment,
+  CallLog,
   Location,
   PagedResult,
 } from '../types/api';
@@ -54,6 +55,11 @@ export const api = {
       method: 'PUT',
       body: JSON.stringify({ enabled }),
     }),
+
+  getCallLogs: (locationId?: string | null, page = 1) =>
+    request<PagedResult<CallLog>>(
+      `/v1/call-logs?page=${page}&pageSize=25${locationId ? `&locationId=${locationId}` : ''}`
+    ),
 
   updateIntegrations: (locationId: string, calendarId: string) =>
     request<{ id: string; calendarId: string | null }>(`/v1/locations/${locationId}/integrations`, {

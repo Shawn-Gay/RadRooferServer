@@ -4,6 +4,30 @@
     ViewData["Title"] = "Dashboard";
 }
 
+<div class="mb-5">
+    <h4 class="mb-3">AI Assistant</h4>
+    @foreach (var location in Model.Locations)
+    {
+        <div class="card mb-2" style="max-width: 480px;">
+            <div class="card-body d-flex align-items-center justify-content-between py-3">
+                <div>
+                    <div class="fw-semibold">@location.Name</div>
+                    <small class="@(location.VapiEnabled ? "text-success" : "text-muted")">
+                        @(location.VapiEnabled ? "Taking calls" : "Calls not being answered by assistant")
+                    </small>
+                </div>
+                <form method="post" asp-page-handler="ToggleAssistant">
+                    <input type="hidden" name="locationId" value="@location.Id" />
+                    <button type="submit" class="btn @(location.VapiEnabled ? "btn-success" : "btn-outline-secondary") d-flex align-items-center gap-2">
+                        <span class="rounded-circle d-inline-block" style="width:10px;height:10px;background:@(location.VapiEnabled ? "#fff" : "#aaa");"></span>
+                        @(location.VapiEnabled ? "On" : "Off")
+                    </button>
+                </form>
+            </div>
+        </div>
+    }
+</div>
+
 <h2 class="mb-4">Recent Activity</h2>
 
 <div class="row g-4">
