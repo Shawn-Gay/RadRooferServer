@@ -1,0 +1,6 @@
+@RoofersTech.Api_HostAddress = http://localhost:5070
+
+GET {{RoofersTech.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

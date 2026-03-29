@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(dotnet build*)",
+      "Bash(dotnet test*)",
+      "Bash(dotnet run*)",
+      "Bash(dotnet format*)",
+      "Bash(dotnet ef migrations*)",
+      "Bash(dotnet ef dbcontext*)",
+      "Bash(git diff*)",
+      "Bash(git status)",
+      "Bash(git log*)",
+      "Bash(git add*)",
+      "Bash(git commit*)",
+      "Bash(git branch*)",
+      "Bash(git checkout*)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Write(./.env)",
+      "Write(./.env.*)",
+      "Read(./src/**/appsettings.Production.json)",
+      "Read(./src/**/appsettings.Staging.json)",
+      "Write(./src/**/appsettings.Production.json)",
+      "Write(./src/**/appsettings.Staging.json)"
+    ],
+    "ask": [
+      "Bash(git push*)",
+      "Bash(git reset*)",
+      "Bash(dotnet ef database*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/block-secrets.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/remind-tests.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  },
+  "includeGitInstructions": true,
+  "model": "claude-sonnet-4-6"
+}

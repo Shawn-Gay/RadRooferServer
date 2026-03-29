@@ -1,0 +1,8 @@
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "dotnet RadRoofer.Api.dll"
+
+[[services]]
+source = "src/RadRoofer.Api"

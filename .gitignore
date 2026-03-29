@@ -1,0 +1,30 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.log
+appsettings.Development.json
+
+# EF Migrations (keep tracked)
+!**/Migrations/
+
+# Node / React Native
+node_modules/
+.expo/
+dist/
+build/
+*.tsbuildinfo
+
+# Environment / secrets
+.env
+.env.*
+appsettings.Production.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Railway
+.railway/

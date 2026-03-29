@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "RadRoofer",
+    "slug": "rad-roofer",
+    "version": "1.0.0",
+    "scheme": "rad-roofer",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.radcoreai.radroofer"
+    },
+    "android": {
+      "package": "com.radcoreai.radroofer"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store"
+    ]
+  }
+}
