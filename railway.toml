@@ -1,8 +1,9 @@
 [build]
 builder = "nixpacks"
+buildCommand = "dotnet publish src/RadRoofer.Api/RadRoofer.Api.csproj -c Release -o out"
+
+[build.nixpacksPlan.phases.setup]
+nixPkgs = ["dotnet-sdk_9"]
 
 [deploy]
-startCommand = "dotnet RadRoofer.Api.dll"
-
-[[services]]
-source = "src/RadRoofer.Api"
+startCommand = "dotnet out/RadRoofer.Api.dll"
