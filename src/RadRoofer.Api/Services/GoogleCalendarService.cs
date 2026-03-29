@@ -40,9 +40,11 @@ public sealed class GoogleCalendarService(IOptions<GoogleCalendarSettings> optio
 
     private CalendarService BuildClient()
     {
-        GoogleCredential credential = GoogleCredential
-            .FromJson(_settings.ResolveServiceAccountJson())
-            .CreateScoped(CalendarService.Scope.Calendar);
+        var credential = new ServiceAccountCredential(
+            new ServiceAccountCredential.Initializer(_settings.ClientEmail)
+            {
+                Scopes = [CalendarService.Scope.Calendar],
+            }.FromPrivateKey(_settings.PrivateKey));
 
         return new CalendarService(new BaseClientService.Initializer
         {
