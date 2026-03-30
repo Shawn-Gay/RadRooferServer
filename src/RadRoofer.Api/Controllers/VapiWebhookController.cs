@@ -77,7 +77,7 @@ public class VapiWebhookController(AppDbContext db, GoogleCalendarService calend
         {
             VapiCallId = call.Id,
             Direction = CallDirection.Inbound,
-            Status = CallStatus.Completed,
+            Status = MapEndedReason(payload.Message.EndedReason),
             Transcript = payload.Message.Artifact?.Transcript,
             Summary = payload.Message.Analysis?.Summary,
             StartedAt = startTime,
@@ -106,6 +106,62 @@ public class VapiWebhookController(AppDbContext db, GoogleCalendarService calend
 
         return Ok(new { appointmentId = appointment.Id, googleEventId });
     }
+
+    private static CallStatus MapEndedReason(string? reason) => reason switch
+    {
+        // ── Assistant wrapped up normally ────────────────────────────────────
+        "assistant-ended-call"                                            => CallStatus.AssistantEnded,
+        "assistant-ended-call-after-message-spoken"                       => CallStatus.AssistantEnded,
+        "assistant-ended-call-with-hangup-task"                           => CallStatus.AssistantEnded,
+        "assistant-said-end-call-phrase"                                  => CallStatus.AssistantEnded,
+        "exceeded-max-duration"                                           => CallStatus.AssistantEnded,
+        "manually-canceled"                                               => CallStatus.AssistantEnded,
+        "call.ending.hook-executed-say"                                   => CallStatus.AssistantEnded,
+        "call.in-progress.twilio-completed-call"                          => CallStatus.AssistantEnded,
+        "vonage-completed"                                                => CallStatus.AssistantEnded,
+        "call.in-progress.sip-completed-call"                             => CallStatus.AssistantEnded,
+
+        // ── Customer hung up ─────────────────────────────────────────────────
+        "customer-ended-call"                                             => CallStatus.CustomerHungUp,
+        "customer-ended-call-before-warm-transfer"                        => CallStatus.CustomerHungUp,
+        "customer-ended-call-after-warm-transfer-attempt"                 => CallStatus.CustomerHungUp,
+        "customer-ended-call-during-transfer"                             => CallStatus.CustomerHungUp,
+
+        // ── Transferred / forwarded ──────────────────────────────────────────
+        "assistant-forwarded-call"                                        => CallStatus.Transferred,
+        "call.ending.hook-executed-transfer"                              => CallStatus.Transferred,
+        "call.ringing.hook-executed-transfer"                             => CallStatus.Transferred,
+
+        // ── Voicemail ────────────────────────────────────────────────────────
+        "voicemail"                                                       => CallStatus.Voicemail,
+
+        // ── No answer ────────────────────────────────────────────────────────
+        "customer-did-not-answer"                                         => CallStatus.NoAnswer,
+        "assistant-join-timed-out"                                        => CallStatus.NoAnswer,
+
+        // ── Busy ─────────────────────────────────────────────────────────────
+        "customer-busy"                                                   => CallStatus.Busy,
+        "call.forwarding.operator-busy"                                   => CallStatus.Busy,
+
+        // ── Caller went silent ───────────────────────────────────────────────
+        "silence-timed-out"                                               => CallStatus.SilenceTimeout,
+
+        // ── Failed to connect at ringing stage ───────────────────────────────
+        "customer-did-not-give-microphone-permission"                     => CallStatus.ConnectionFailed,
+        "call.in-progress.error-assistant-did-not-receive-customer-audio" => CallStatus.ConnectionFailed,
+        "twilio-failed-to-connect-call"                                   => CallStatus.ConnectionFailed,
+        "twilio-reported-customer-misdialed"                              => CallStatus.ConnectionFailed,
+        "vonage-disconnected"                                             => CallStatus.ConnectionFailed,
+        "vonage-failed-to-connect-call"                                   => CallStatus.ConnectionFailed,
+        "vonage-rejected"                                                 => CallStatus.ConnectionFailed,
+        "call.ringing.error-sip-inbound-call-failed-to-connect"           => CallStatus.ConnectionFailed,
+        "call.ringing.sip-inbound-caller-hungup-before-call-connect"      => CallStatus.ConnectionFailed,
+        "call.ringing.hook-executed-say"                                  => CallStatus.ConnectionFailed,
+
+        // ── Technical failure (call.start.error-*, pipeline-error-*, ─────────
+        //    *-voice-failed, *-transcriber-failed, transport, worker-shutdown) ─
+        _                                                                 => CallStatus.Failed,
+    };
 
     private static string BuildNotes(
         string? callerName,

@@ -13,6 +13,9 @@ public record VapiMessage
     [JsonPropertyName("type")]
     public required string Type { get; init; }
 
+    [JsonPropertyName("endedReason")]
+    public string? EndedReason { get; init; }
+
     [JsonPropertyName("call")]
     public VapiCall? Call { get; init; }
 

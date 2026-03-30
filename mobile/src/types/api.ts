@@ -37,10 +37,30 @@ export interface Location {
   calendarId: string | null;
 }
 
+export const CallStatus = {
+  AssistantEnded:   'AssistantEnded',
+  CustomerHungUp:   'CustomerHungUp',
+  Transferred:      'Transferred',
+  Voicemail:        'Voicemail',
+  NoAnswer:         'NoAnswer',
+  Busy:             'Busy',
+  SilenceTimeout:   'SilenceTimeout',
+  ConnectionFailed: 'ConnectionFailed',
+  Failed:           'Failed',
+} as const;
+export type CallStatus = typeof CallStatus[keyof typeof CallStatus];
+
+export const CallDirection = {
+  Inbound:  'Inbound',
+  Outbound: 'Outbound',
+} as const;
+export type CallDirection = typeof CallDirection[keyof typeof CallDirection];
+
 export interface CallLog {
   id: string;
-  direction: string;
-  status: string;
+  direction: CallDirection;
+  status: CallStatus;
+  appointmentId: string | null;
   startedAt: string;
   endedAt: string | null;
   summary: string | null;

@@ -2,7 +2,26 @@ import { View, Text, FlatList, StyleSheet, ActivityIndicator } from 'react-nativ
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../src/api/client';
 import { useAuthStore } from '../../src/store/auth';
+import { CallStatus } from '../../src/types/api';
 import type { CallLog } from '../../src/types/api';
+
+type OutcomeConfig = { label: string; bg: string; text: string };
+
+function getOutcome(call: CallLog): OutcomeConfig {
+  if (call.appointmentId) return { label: 'Appointment Made',  bg: '#DCFCE7', text: '#16A34A' };
+  switch (call.status) {
+    case CallStatus.AssistantEnded:   return { label: 'No Booking',        bg: '#F1F5F9', text: '#64748B' };
+    case CallStatus.CustomerHungUp:   return { label: 'Hung Up',           bg: '#FEE2E2', text: '#DC2626' };
+    case CallStatus.Transferred:      return { label: 'Transferred',       bg: '#F3E8FF', text: '#9333EA' };
+    case CallStatus.Voicemail:        return { label: 'Voicemail',         bg: '#DBEAFE', text: '#2563EB' };
+    case CallStatus.NoAnswer:         return { label: 'No Answer',         bg: '#FEF3C7', text: '#D97706' };
+    case CallStatus.Busy:             return { label: 'Busy',              bg: '#FEF3C7', text: '#D97706' };
+    case CallStatus.SilenceTimeout:   return { label: 'No Response',       bg: '#FEF3C7', text: '#D97706' };
+    case CallStatus.ConnectionFailed: return { label: 'Connection Failed', bg: '#FEE2E2', text: '#DC2626' };
+    case CallStatus.Failed:           return { label: 'Failed',            bg: '#FEE2E2', text: '#DC2626' };
+    default:                          return { label: 'Unknown',           bg: '#F1F5F9', text: '#64748B' };
+  }
+}
 
 function CallRow({ call }: { call: CallLog }) {
   const started = new Date(call.startedAt).toLocaleString(undefined, {
@@ -17,6 +36,7 @@ function CallRow({ call }: { call: CallLog }) {
     : null;
 
   const isInbound = call.direction === 'Inbound';
+  const outcome = getOutcome(call);
 
   return (
     <View style={styles.card}>
@@ -26,13 +46,15 @@ function CallRow({ call }: { call: CallLog }) {
             {call.direction}
           </Text>
         </View>
+        <View style={[styles.outcomeBadge, { backgroundColor: outcome.bg }]}>
+          <Text style={[styles.outcomeText, { color: outcome.text }]}>{outcome.label}</Text>
+        </View>
         <Text style={styles.time}>{started}</Text>
       </View>
       {!!call.summary && (
         <Text style={styles.summary} numberOfLines={2}>{call.summary}</Text>
       )}
       <View style={styles.cardFooter}>
-        <Text style={styles.meta}>{call.status}</Text>
         {!!duration && <Text style={styles.meta}>{duration}</Text>}
       </View>
     </View>
@@ -94,6 +116,8 @@ const styles = StyleSheet.create({
   outboundText: { color: '#64748B' },
   time: { fontSize: 12, color: '#94A3B8' },
   summary: { fontSize: 13, color: '#475569', marginBottom: 8, lineHeight: 18 },
+  outcomeBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
+  outcomeText: { fontSize: 11, fontWeight: '600' },
   cardFooter: { flexDirection: 'row', justifyContent: 'space-between' },
   meta: { fontSize: 11, color: '#94A3B8' },
   empty: { color: '#94A3B8', textAlign: 'center', marginTop: 60 },
