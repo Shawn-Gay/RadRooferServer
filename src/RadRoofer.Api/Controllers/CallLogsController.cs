@@ -19,7 +19,9 @@ public class CallLogsController(AppDbContext db) : ControllerBase
             .OrderByDescending(o => o.StartedAt);
 
         if (locationId.HasValue)
+        {
             query = query.Where(o => o.ServiceLocation.Id == locationId.Value);
+        }
 
         int total = await query.CountAsync(ct);
         int take = Math.Min(pageSize, 100);

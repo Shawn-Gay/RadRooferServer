@@ -74,7 +74,9 @@ public class AppointmentsController(AppDbContext db) : ControllerBase
         IQueryable<Appointment> query = db.Appointments.AsNoTracking();
 
         if (locationId.HasValue)
+        {
             query = query.Where(o => o.ServiceLocation.Id == locationId.Value);
+        }
 
         DateTimeOffset today = DateTimeOffset.UtcNow.Date;
         DateTimeOffset weekStart = today.AddDays(-(int)today.DayOfWeek);

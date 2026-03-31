@@ -18,11 +18,11 @@ public class AppointmentConfiguration : IEntityTypeConfiguration<Appointment>
 
         builder.HasOne(o => o.Organization)
                .WithMany()
-               .HasForeignKey("OrganizationId");
+               .HasForeignKey(o => o.OrganizationId);
 
         builder.HasOne(o => o.ServiceLocation)
                .WithMany(o => o.Appointments)
-               .HasForeignKey("ServiceLocationId");
+               .HasForeignKey(o => o.ServiceLocationId);
 
         builder.HasOne(o => o.Customer)
                .WithMany(o => o.Appointments)
@@ -42,8 +42,8 @@ public class AppointmentConfiguration : IEntityTypeConfiguration<Appointment>
                .IsRequired(false)
                .OnDelete(DeleteBehavior.SetNull);
 
-        builder.HasIndex("OrganizationId");
-        builder.HasIndex("ServiceLocationId");
+        builder.HasIndex(o => o.OrganizationId);
+        builder.HasIndex(o => o.ServiceLocationId);
         builder.HasIndex("CustomerId");
     }
 }

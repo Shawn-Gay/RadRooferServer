@@ -18,16 +18,24 @@ public class VapiWebhookController(AppDbContext db, GoogleCalendarService calend
         CancellationToken ct)
     {
         if (payload.Message.Type != "end-of-call-report")
+        {
             return Ok();
+        }
 
         var call = payload.Message.Call;
-        if (call is null) return Ok();
+        if (call is null)
+        {
+            return Ok();
+        }
 
         // Idempotency: VapiCallId has a unique index — skip if already processed
         bool alreadyProcessed = await db.CallLogs
             .IgnoreQueryFilters()
             .AnyAsync(o => o.VapiCallId == call.Id, ct);
-        if (alreadyProcessed) return Ok();
+        if (alreadyProcessed)
+        {
+            return Ok();
+        }
 
         var location = await db.ServiceLocations
             .IgnoreQueryFilters()
@@ -42,42 +50,61 @@ public class VapiWebhookController(AppDbContext db, GoogleCalendarService calend
             })
             .FirstOrDefaultAsync(ct);
 
-        if (location is null) return Ok();
-        if (!location.VapiEnabled) return Ok(new { status = "disabled" });
+        if (location is null)
+        {
+            return Ok();
+        }
 
-        var data = payload.Message.Analysis?.StructuredData;
-        string? callerName = data?.CallerName;
-        string? callerPhone = data?.CallerPhone ?? call.Customer?.Number;
-        string? address = data?.Address;
-        string? reason = data?.ReasonForCall;
+        if (!location.VapiEnabled)
+        {
+            return Ok(new { status = "disabled" });
+        }
+
+        CallStatus callStatus = MapEndedReason(payload.Message.EndedReason);
 
         DateTimeOffset startTime = call.StartedAt ?? DateTimeOffset.UtcNow;
         DateTimeOffset endTime = call.EndedAt ?? startTime.AddHours(1);
 
-        string notes = BuildNotes(callerName, callerPhone, address, reason, payload.Message.Analysis?.Summary);
+        Appointment? appointment = null;
+        string? googleEventId = null;
 
-        string? googleEventId = await calendar.CreateEventAsync(
-            calendarId: location.CalendarId,
-            title: $"Roofing Inquiry — {callerName ?? callerPhone ?? "Unknown"}",
-            description: notes,
-            startUtc: startTime,
-            endUtc: endTime,
-            ct: ct);
-
-        var appointment = new Appointment
+        if (callStatus == CallStatus.AssistantEnded)
         {
-            StartTime = startTime,
-            EndTime = endTime,
-            Notes = notes,
-            ExternalId = googleEventId,
-            Status = AppointmentStatus.Scheduled,
-        };
+            var data = payload.Message.Analysis?.StructuredData;
+            string? callerName = data?.CallerName;
+            string? callerPhone = data?.CallerPhone ?? call.Customer?.Number;
+            string? address = data?.Address;
+            string? reason = data?.ReasonForCall;
+
+            string notes = BuildNotes(callerName, callerPhone, address, reason, payload.Message.Analysis?.Summary);
+
+            googleEventId = await calendar.CreateEventAsync(
+                calendarId: location.CalendarId,
+                title: $"Roofing Inquiry — {callerName ?? callerPhone ?? "Unknown"}",
+                description: notes,
+                startUtc: startTime,
+                endUtc: endTime,
+                ct: ct);
+
+            appointment = new Appointment
+            {
+                StartTime = startTime,
+                EndTime = endTime,
+                Notes = notes,
+                ExternalId = googleEventId,
+                Status = AppointmentStatus.Scheduled,
+            };
+
+            appointment.OrganizationId = location.OrganizationId;
+            appointment.ServiceLocationId = locationId;
+            db.Appointments.Add(appointment);
+        }
 
         var callLog = new CallLog
         {
             VapiCallId = call.Id,
             Direction = CallDirection.Inbound,
-            Status = MapEndedReason(payload.Message.EndedReason),
+            Status = callStatus,
             Transcript = payload.Message.Artifact?.Transcript,
             Summary = payload.Message.Analysis?.Summary,
             StartedAt = startTime,
@@ -85,13 +112,9 @@ public class VapiWebhookController(AppDbContext db, GoogleCalendarService calend
             Appointment = appointment,
         };
 
-        db.Appointments.Add(appointment);
-        db.Entry(appointment).Property("OrganizationId").CurrentValue = location.OrganizationId;
-        db.Entry(appointment).Property("ServiceLocationId").CurrentValue = locationId;
-
+        callLog.OrganizationId = location.OrganizationId;
+        callLog.ServiceLocationId = locationId;
         db.CallLogs.Add(callLog);
-        db.Entry(callLog).Property("OrganizationId").CurrentValue = location.OrganizationId;
-        db.Entry(callLog).Property("ServiceLocationId").CurrentValue = locationId;
 
         try
         {
@@ -104,7 +127,7 @@ public class VapiWebhookController(AppDbContext db, GoogleCalendarService calend
             return Ok();
         }
 
-        return Ok(new { appointmentId = appointment.Id, googleEventId });
+        return Ok(new { appointmentId = appointment?.Id, googleEventId });
     }
 
     private static CallStatus MapEndedReason(string? reason) => reason switch
@@ -171,11 +194,26 @@ public class VapiWebhookController(AppDbContext db, GoogleCalendarService calend
         string? summary)
     {
         var parts = new List<string>();
-        if (!string.IsNullOrEmpty(callerName)) parts.Add($"Name: {callerName}");
-        if (!string.IsNullOrEmpty(callerPhone)) parts.Add($"Phone: {callerPhone}");
-        if (!string.IsNullOrEmpty(address)) parts.Add($"Address: {address}");
-        if (!string.IsNullOrEmpty(reason)) parts.Add($"Reason: {reason}");
-        if (!string.IsNullOrEmpty(summary)) parts.Add($"\nSummary: {summary}");
+        if (!string.IsNullOrEmpty(callerName))
+        {
+            parts.Add($"Name: {callerName}");
+        }
+        if (!string.IsNullOrEmpty(callerPhone))
+        {
+            parts.Add($"Phone: {callerPhone}");
+        }
+        if (!string.IsNullOrEmpty(address))
+        {
+            parts.Add($"Address: {address}");
+        }
+        if (!string.IsNullOrEmpty(reason))
+        {
+            parts.Add($"Reason: {reason}");
+        }
+        if (!string.IsNullOrEmpty(summary))
+        {
+            parts.Add($"\nSummary: {summary}");
+        }
         return string.Join("\n", parts);
     }
 }

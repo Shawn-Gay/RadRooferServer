@@ -28,7 +28,9 @@ public class AuthController(AppDbContext db, IConfiguration config) : Controller
             .FirstOrDefaultAsync(ct);
 
         if (user is null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+        {
             return Unauthorized();
+        }
 
         var jwtSecret = config["Jwt:Secret"]
             ?? throw new InvalidOperationException("Jwt:Secret is not configured.");

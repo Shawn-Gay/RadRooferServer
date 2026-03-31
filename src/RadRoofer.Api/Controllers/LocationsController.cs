@@ -41,7 +41,10 @@ public class LocationsController(AppDbContext db) : ControllerBase
         ServiceLocation? location = await db.ServiceLocations
             .FirstOrDefaultAsync(o => o.Id == id, ct);
 
-        if (location is null) return NotFound();
+        if (location is null)
+        {
+            return NotFound();
+        }
 
         location.VapiEnabled = req.Enabled;
         await db.SaveChangesAsync(ct);
@@ -58,7 +61,10 @@ public class LocationsController(AppDbContext db) : ControllerBase
         ServiceLocation? location = await db.ServiceLocations
             .FirstOrDefaultAsync(o => o.Id == id, ct);
 
-        if (location is null) return NotFound();
+        if (location is null)
+        {
+            return NotFound();
+        }
 
         location.CalendarId = string.IsNullOrWhiteSpace(req.CalendarId) ? null : req.CalendarId.Trim();
         await db.SaveChangesAsync(ct);

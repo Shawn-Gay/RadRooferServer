@@ -18,11 +18,11 @@ public class CallLogConfiguration : IEntityTypeConfiguration<CallLog>
 
         builder.HasOne(o => o.Organization)
                .WithMany()
-               .HasForeignKey("OrganizationId");
+               .HasForeignKey(o => o.OrganizationId);
 
         builder.HasOne(o => o.ServiceLocation)
                .WithMany(o => o.CallLogs)
-               .HasForeignKey("ServiceLocationId");
+               .HasForeignKey(o => o.ServiceLocationId);
 
         builder.HasOne(o => o.Customer)
                .WithMany(o => o.CallLogs)
@@ -37,7 +37,7 @@ public class CallLogConfiguration : IEntityTypeConfiguration<CallLog>
                .OnDelete(DeleteBehavior.SetNull);
 
         builder.HasIndex(o => o.VapiCallId).IsUnique();
-        builder.HasIndex("OrganizationId");
-        builder.HasIndex("ServiceLocationId");
+        builder.HasIndex(o => o.OrganizationId);
+        builder.HasIndex(o => o.ServiceLocationId);
     }
 }

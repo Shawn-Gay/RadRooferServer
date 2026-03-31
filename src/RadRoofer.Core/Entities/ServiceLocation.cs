@@ -32,4 +32,5 @@ public class ServiceLocation : BaseEntity, IOrganizationIsolated
     public ICollection<Customer> Customers { get; set; } = [];
     public ICollection<PhysicalLocation> PhysicalLocations { get; set; } = [];
     public ICollection<ContactInfo> ContactInfos { get; set; } = new List<ContactInfo>();
+    public ICollection<LocationSchedule> Schedule { get; set; } = [];
 }

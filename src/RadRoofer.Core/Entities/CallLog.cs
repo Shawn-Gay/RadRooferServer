@@ -24,6 +24,9 @@ public class CallLog : BaseEntity, IOrganizationIsolated, IServiceLocationIsolat
 
     public DateTimeOffset? EndedAt { get; set; }
 
+    public Guid OrganizationId { get; set; }
+    public Guid ServiceLocationId { get; set; }
+
     public Organization Organization { get; set; } = null!;
     public ServiceLocation ServiceLocation { get; set; } = null!;
     public Customer? Customer { get; set; }

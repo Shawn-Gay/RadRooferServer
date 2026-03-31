@@ -19,6 +19,9 @@ public class Appointment : BaseEntity, IOrganizationIsolated, IServiceLocationIs
 
     public DateTimeOffset? LastSynced { get; set; }
 
+    public Guid OrganizationId { get; set; }
+    public Guid ServiceLocationId { get; set; }
+
     public Organization Organization { get; set; } = null!;
     public ServiceLocation ServiceLocation { get; set; } = null!;
     public Customer? Customer { get; set; }

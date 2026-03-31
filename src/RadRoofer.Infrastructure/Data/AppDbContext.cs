@@ -28,6 +28,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IHttpContextAc
     public DbSet<Appointment> Appointments => Set<Appointment>();
     public DbSet<PhysicalLocation> PhysicalLocations => Set<PhysicalLocation>();
     public DbSet<ContactInfo> ContactInfos => Set<ContactInfo>();
+    public DbSet<LocationSchedule> LocationSchedules => Set<LocationSchedule>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -70,6 +71,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IHttpContextAc
 
         modelBuilder.Entity<ContactInfo>().HasQueryFilter(
             o => OrganizationId.HasValue && EF.Property<Guid>(o, "OrganizationId") == OrganizationId.GetValueOrDefault());
+
+        modelBuilder.Entity<LocationSchedule>().HasQueryFilter(
+            o => OrganizationId.HasValue && o.OrganizationId == OrganizationId.GetValueOrDefault()
+              && o.SoftDeletedAt == null);
 
         SeedData.Seed(modelBuilder);
     }
