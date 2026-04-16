@@ -19,27 +19,26 @@ export default function AppLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Dashboard',
+          title: 'Home',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="bar-chart-outline" size={size} color={color} />
+            <Ionicons name="home-outline" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="leads"
-        options={{
-          title: 'Appointments',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="calendar-outline" size={size} color={color} />
-          ),
-        }}
+        options={{ href: null }}
       />
       <Tabs.Screen
         name="calls"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="outbound"
         options={{
-          title: 'Calls',
+          title: 'Outbound',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="call-outline" size={size} color={color} />
+            <Ionicons name="arrow-up-circle-outline" size={size} color={color} />
           ),
         }}
       />

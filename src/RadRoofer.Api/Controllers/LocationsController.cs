@@ -21,6 +21,8 @@ public class LocationsController(AppDbContext db) : ControllerBase
                 IsActive = o.Status == ServiceLocationStatus.Open,
                 o.VapiEnabled,
                 o.CalendarId,
+                o.VapiAssistantId,
+                o.VapiPhoneNumberId,
             })
             .ToListAsync(ct);
             
@@ -49,6 +51,24 @@ public class LocationsController(AppDbContext db) : ControllerBase
         return Ok(new { location.Id, location.VapiEnabled });
     }
 
+    [HttpPut("{id:guid}/vapi")]
+    public async Task<IActionResult> UpdateVapi(
+        Guid id,
+        [FromBody] UpdateVapiRequest req,
+        CancellationToken ct)
+    {
+        ServiceLocation? location = await db.ServiceLocations
+            .FirstOrDefaultAsync(o => o.Id == id, ct);
+
+        if (location is null) return NotFound();
+
+        location.VapiAssistantId = string.IsNullOrWhiteSpace(req.AssistantId) ? null : req.AssistantId.Trim();
+        location.VapiPhoneNumberId = string.IsNullOrWhiteSpace(req.PhoneNumberId) ? null : req.PhoneNumberId.Trim();
+        await db.SaveChangesAsync(ct);
+
+        return Ok(new { location.Id, location.VapiAssistantId, location.VapiPhoneNumberId });
+    }
+
     [HttpPut("{id:guid}/integrations")]
     public async Task<IActionResult> UpdateIntegrations(
         Guid id,
@@ -75,4 +95,10 @@ public record ToggleAssistantRequest
 public record UpdateIntegrationsRequest
 {
     public string? CalendarId { get; init; }
+}
+
+public record UpdateVapiRequest
+{
+    public string? AssistantId { get; init; }
+    public string? PhoneNumberId { get; init; }
 }

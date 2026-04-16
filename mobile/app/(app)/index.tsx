@@ -1,7 +1,9 @@
 import {
   View, Text, ScrollView, StyleSheet,
-  ActivityIndicator, RefreshControl, Switch,
+  ActivityIndicator, RefreshControl, Switch, TouchableOpacity,
 } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../src/api/client';
 import { useAuthStore } from '../../src/store/auth';
@@ -57,7 +59,18 @@ function VapiToggle({ location }: { location: Location }) {
   );
 }
 
-export default function DashboardScreen() {
+function NavCard({ label, icon, onPress }: { label: string; icon: React.ComponentProps<typeof Ionicons>['name']; onPress: () => void }) {
+  return (
+    <TouchableOpacity style={styles.navCard} onPress={onPress} activeOpacity={0.7}>
+      <Ionicons name={icon} size={28} color="#2563EB" />
+      <Text style={styles.navCardLabel}>{label}</Text>
+      <Ionicons name="chevron-forward" size={18} color="#94A3B8" style={{ marginLeft: 'auto' }} />
+    </TouchableOpacity>
+  );
+}
+
+export default function HomeScreen() {
+  const router = useRouter();
   const { user, activeLocationId } = useAuthStore();
 
   const { data: stats, isLoading: statsLoading, refetch: refetchStats } = useQuery({
@@ -86,7 +99,7 @@ export default function DashboardScreen() {
       refreshControl={<RefreshControl refreshing={false} onRefresh={onRefresh} />}
     >
       <View style={styles.header}>
-        <Text style={styles.heading}>Dashboard</Text>
+        <Text style={styles.heading}>Home</Text>
         <Text style={styles.tenant}>{user?.tenantName}</Text>
       </View>
 
@@ -102,6 +115,11 @@ export default function DashboardScreen() {
           <StatCard label="Appts This Week" value={stats?.thisWeek ?? 0} />
         </View>
       )}
+
+      <View style={styles.navSection}>
+        <NavCard label="Appointments" icon="calendar-outline" onPress={() => router.push('/leads')} />
+        <NavCard label="Calls" icon="call-outline" onPress={() => router.push('/calls')} />
+      </View>
     </ScrollView>
   );
 }
@@ -149,4 +167,19 @@ const styles = StyleSheet.create({
   },
   statValue: { fontSize: 32, fontWeight: '700', color: '#2563EB' },
   statLabel: { fontSize: 12, color: '#64748B', marginTop: 4 },
+  navSection: { marginTop: 24, gap: 10 },
+  navCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  navCardLabel: { fontSize: 15, fontWeight: '600', color: '#1E293B' },
 });

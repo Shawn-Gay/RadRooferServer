@@ -8,6 +8,79 @@ import { useAuthStore } from '../../src/store/auth';
 import { api } from '../../src/api/client';
 import type { Location } from '../../src/types/api';
 
+function VapiSection({ location }: { location: Location }) {
+  const queryClient = useQueryClient();
+  const [assistantId, setAssistantId] = useState(location.vapiAssistantId ?? '');
+  const [phoneNumberId, setPhoneNumberId] = useState(location.vapiPhoneNumberId ?? '');
+
+  useEffect(() => {
+    setAssistantId(location.vapiAssistantId ?? '');
+    setPhoneNumberId(location.vapiPhoneNumberId ?? '');
+  }, [location.vapiAssistantId, location.vapiPhoneNumberId]);
+
+  const { mutate: save, isPending } = useMutation({
+    mutationFn: () => api.updateVapiSettings(location.id, assistantId, phoneNumberId),
+    onSuccess: (result) => {
+      queryClient.setQueryData<{ items: Location[] }>(['locations'], (old) => {
+        if (!old) return old;
+        return {
+          items: old.items.map((o) =>
+            o.id === result.id
+              ? { ...o, vapiAssistantId: result.vapiAssistantId, vapiPhoneNumberId: result.vapiPhoneNumberId }
+              : o
+          ),
+        };
+      });
+      Alert.alert('Saved', 'Vapi settings updated.');
+    },
+  });
+
+  const isDirty =
+    assistantId !== (location.vapiAssistantId ?? '') ||
+    phoneNumberId !== (location.vapiPhoneNumberId ?? '');
+
+  return (
+    <View style={styles.card}>
+      <Text style={styles.cardTitle}>Vapi — {location.name}</Text>
+
+      <Text style={styles.fieldLabel}>Assistant ID</Text>
+      <TextInput
+        style={styles.input}
+        value={assistantId}
+        onChangeText={setAssistantId}
+        placeholder="e.g. asst_xxxxxxxxxxxxxxxx"
+        placeholderTextColor="#94A3B8"
+        autoCapitalize="none"
+        autoCorrect={false}
+      />
+
+      <Text style={[styles.fieldLabel, { marginTop: 12 }]}>Phone Number ID</Text>
+      <TextInput
+        style={styles.input}
+        value={phoneNumberId}
+        onChangeText={setPhoneNumberId}
+        placeholder="e.g. phone_xxxxxxxxxxxxxxxx"
+        placeholderTextColor="#94A3B8"
+        autoCapitalize="none"
+        autoCorrect={false}
+      />
+      <Text style={styles.hint}>
+        Found in your Vapi dashboard. Required for outbound calls.
+      </Text>
+
+      <TouchableOpacity
+        style={[styles.saveButton, !isDirty && styles.saveButtonDisabled]}
+        onPress={() => save()}
+        disabled={!isDirty || isPending}
+      >
+        {isPending
+          ? <ActivityIndicator size="small" color="#FFFFFF" />
+          : <Text style={styles.saveButtonText}>Save</Text>}
+      </TouchableOpacity>
+    </View>
+  );
+}
+
 function IntegrationsSection({ location }: { location: Location }) {
   const queryClient = useQueryClient();
   const [calendarId, setCalendarId] = useState(location.calendarId ?? '');
@@ -110,12 +183,15 @@ export default function SettingsScreen() {
       </View>
 
       {activeLocation ? (
-        <IntegrationsSection location={activeLocation} />
+        <>
+          <VapiSection location={activeLocation} />
+          <IntegrationsSection location={activeLocation} />
+        </>
       ) : (
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Integrations</Text>
+          <Text style={styles.cardTitle}>Vapi / Integrations</Text>
           <Text style={styles.noLocation}>
-            Select a location in the Locations tab to configure integrations.
+            Select a location in the Locations tab to configure settings.
           </Text>
         </View>
       )}
