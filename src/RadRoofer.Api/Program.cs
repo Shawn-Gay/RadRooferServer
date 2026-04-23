@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.Options;
 using RadRoofer.Api.Filters;
 using RadRoofer.Api.Services;
 using RadRoofer.Api.Settings;
@@ -67,6 +68,15 @@ builder.Services.AddScoped<VapiSecretAuthFilter>();
 builder.Services.Configure<GoogleCalendarSettings>(
     builder.Configuration.GetSection("GoogleCalendar"));
 builder.Services.AddScoped<GoogleCalendarService>();
+builder.Services.Configure<VapiSettings>(
+    builder.Configuration.GetSection("Vapi"));
+builder.Services.AddHttpClient("vapi", (sp, client) =>
+{
+    var apiKey = sp.GetRequiredService<IOptions<VapiSettings>>().Value.ApiKey;
+    client.BaseAddress = new Uri("https://api.vapi.ai/");
+    client.DefaultRequestHeaders.Authorization =
+        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiKey);
+});
 
 var app = builder.Build();
 

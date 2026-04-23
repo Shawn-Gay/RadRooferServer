@@ -66,4 +66,19 @@ export const api = {
       method: 'PUT',
       body: JSON.stringify({ calendarId }),
     }),
+
+  initiateOutboundCall: (phoneNumber: string, locationId?: string | null) =>
+    request<{ callId: string }>('/v1/calls/outbound', {
+      method: 'POST',
+      body: JSON.stringify({ phoneNumber, locationId }),
+    }),
+
+  updateVapiSettings: (locationId: string, assistantId: string, phoneNumberId: string) =>
+    request<{ id: string; vapiAssistantId: string | null; vapiPhoneNumberId: string | null }>(
+      `/v1/locations/${locationId}/vapi`,
+      {
+        method: 'PUT',
+        body: JSON.stringify({ assistantId, phoneNumberId }),
+      }
+    ),
 };

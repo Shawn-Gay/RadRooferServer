@@ -35,6 +35,8 @@ export interface Location {
   isActive: boolean;
   vapiEnabled: boolean;
   calendarId: string | null;
+  vapiAssistantId: string | null;
+  vapiPhoneNumberId: string | null;
 }
 
 export const CallStatus = {

@@ -13,6 +13,8 @@ public class ServiceLocationConfiguration : IEntityTypeConfiguration<ServiceLoca
         builder.Property(o => o.Status).HasConversion<string>().HasMaxLength(50);
         builder.Property(o => o.VapiEnabled).HasDefaultValue(true);
         builder.Property(o => o.VapiSecret).HasMaxLength(200);
+        builder.Property(o => o.VapiAssistantId).HasMaxLength(200);
+        builder.Property(o => o.VapiPhoneNumberId).HasMaxLength(200);
         builder.Property(o => o.CalendarId).HasMaxLength(200);
         builder.Property(o => o.CreatedAt).HasColumnType("timestamp with time zone");
         builder.Property(o => o.UpdatedAt).HasColumnType("timestamp with time zone");

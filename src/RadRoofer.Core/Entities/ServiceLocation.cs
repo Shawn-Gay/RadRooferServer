@@ -18,6 +18,12 @@ public class ServiceLocation : BaseEntity, IOrganizationIsolated
     [MaxLength(200)]
     public string? VapiSecret { get; set; }
 
+    [MaxLength(200)]
+    public string? VapiAssistantId { get; set; }
+
+    [MaxLength(200)]
+    public string? VapiPhoneNumberId { get; set; }
+
     // Overrides the global GoogleCalendar:CalendarId setting for this location
     [MaxLength(200)]
     public string? CalendarId { get; set; }
